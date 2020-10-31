@@ -1,0 +1,4 @@
+
+wallShearComponent/wallShearComponent.C
+
+LIB = $(FOAM_USER_LIBBIN)/libcustomFieldFunctionObjects
