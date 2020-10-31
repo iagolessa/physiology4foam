@@ -1,0 +1,17 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+if [ "$PWD" != "$CUSTOM_PROJECT_DIR/src" ] 
+then
+    echo "Error: Current directory in not \$CUSTOM_PROJECT_DIR/src"
+    echo "    The environment variable are not consistent with the installation."
+    echo "    Check the FOAM entries in your dot-files and source them."
+    exit 1
+fi
+
+set +x
+
+wmake libso finiteVolume
+functionObjects/Allwmake
+
+# ----------------------------------------------------------------- end-of-file
