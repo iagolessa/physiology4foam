@@ -125,13 +125,13 @@ int main(int argc, char *argv[])
         IOobject
         (
             fieldName,
-            runTime.constant(),
+            runTime.timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionSet(0,1,0,0,0,0,0),
+        dimensionSet(0,0,0,0,0,0,0),
         T,
         zeroGradientFvPatchScalarField::typeName
     );
