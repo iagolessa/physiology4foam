@@ -64,13 +64,21 @@ int main(int argc, char *argv[])
 
     argList::noParallel();
     argList::addArgument("vtk-file", "The input legacy ascii vtk file");
-    argList::addArgument("fieldName", "Name of the cell field to convert");
+
+    argList::addOption
+    (
+        "fields",
+        "words",
+        "Specify single or multiple fields to write (mandatory)\n"
+        "Eg, 'T' or '(p T U)'"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"
 
     IFstream mshStream(args[1]);
-    const word fieldName(args[2]);
+
+    const List<word> fields(args.getList<word>("fields", false));
 
     vtkUnstructuredReader reader(runTime, mshStream);
 
@@ -116,29 +124,33 @@ int main(int argc, char *argv[])
     );
 
     // Getting field from cells
-    const scalarField T =
-        reader.cellData().lookupObject<scalarField>(fieldName);
+    forAll(fields, fieldI)
+    {
+        word fieldName = fields[fieldI];
+        
+        const scalarField field =
+            reader.cellData().lookupObject<scalarField>(fieldName);
 
-    // Creating field thickness
-    volScalarField Thickness
-    (
-        IOobject
+        // Creating field
+        volScalarField T
         (
-            fieldName,
-            runTime.timeName(),
+            IOobject
+            (
+                fieldName,
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
             mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionSet(0,0,0,0,0,0,0),
-        T,
-        zeroGradientFvPatchScalarField::typeName
-    );
+            dimensionSet(0,0,0,0,0,0,0),
+            field,
+            zeroGradientFvPatchScalarField::typeName
+        );
 
-
-    Info << "Writing field " << fieldName << " ..." << endl;
-    Thickness.write();
+        Info << "Writing field " << fieldName << " ..." << endl;
+        T.write();
+    }
 
     Info<< "End\n" << endl;
 
