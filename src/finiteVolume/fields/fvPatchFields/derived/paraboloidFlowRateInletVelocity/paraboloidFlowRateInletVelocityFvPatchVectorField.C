@@ -46,7 +46,10 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
     rhoName_("rho"),
     rhoInlet_(0.0),
     volumetric_(false),
-    centre_()
+    centre_(),
+    scaledFlowRate_(false),
+    avgDiameter_(),
+    powerCoeff_()
 {}
 
 
@@ -65,6 +68,18 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
     centre_
     (
         dict.lookupOrDefault<vector>("centre", vector::zero)
+    ),
+    scaledFlowRate_
+    (
+        dict.lookupOrDefault<bool>("scaledFlowRate", false)
+    ),
+    avgDiameter_
+    (
+        dict.lookupOrDefault<scalar>("avgDiameter", 0.0)
+    ),
+    powerCoeff_
+    (
+        dict.lookupOrDefault<scalar>("powerCoeff", 0.0)
     )
 {
     if (dict.found("volumetricFlowRate"))
@@ -83,6 +98,22 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
         FatalIOErrorInFunction(dict)
             << "Please supply either 'volumetricFlowRate' or"
             << " 'massFlowRate' and 'rho'" << nl
+            << exit(FatalIOError);
+    }
+
+    if (scaledFlowRate_ && avgDiameter_ <= 0.0)
+    {
+        FatalIOErrorInFunction(dict)
+            << "'avgDiameter' not found or negative value specified "
+            << "for scaled flow rate" << nl
+            << exit(FatalIOError);
+    }
+
+    if (scaledFlowRate_ && powerCoeff_ == 0.0)
+    {
+        FatalIOErrorInFunction(dict)
+            << "'powerCoeff' not found or negative value specified "
+            << "for scaled flow rate" << nl
             << exit(FatalIOError);
     }
 
@@ -115,7 +146,10 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
     rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),
     volumetric_(ptf.volumetric_),
-    centre_(ptf.centre_)
+    centre_(ptf.centre_),
+    scaledFlowRate_(ptf.scaledFlowRate_),
+    avgDiameter_(ptf.avgDiameter_),
+    powerCoeff_(ptf.powerCoeff_)
 {}
 
 
@@ -130,7 +164,10 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
     rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),
     volumetric_(ptf.volumetric_),
-    centre_(ptf.centre_)
+    centre_(ptf.centre_),
+    scaledFlowRate_(ptf.scaledFlowRate_),
+    avgDiameter_(ptf.avgDiameter_),
+    powerCoeff_(ptf.powerCoeff_)
 {}
 
 
@@ -146,7 +183,10 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
     rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),
     volumetric_(ptf.volumetric_),
-    centre_(ptf.centre_)
+    centre_(ptf.centre_),
+    scaledFlowRate_(ptf.scaledFlowRate_),
+    avgDiameter_(ptf.avgDiameter_),
+    powerCoeff_(ptf.powerCoeff_)
 {}
 
 
@@ -160,6 +200,9 @@ void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::updateValues
 {
     const scalar t = db().time().timeOutputValue();
 
+    // Volumetric flow-rate
+    scalar tFlowRate = flowRate_->value(t);
+
     const vectorField n(patch().nf());
 
 	const scalar gSumArea(gSum(patch().magSf()));
@@ -171,8 +214,14 @@ void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::updateValues
 	// Radial coordinate
 	const scalarField r(mag(patch().Cf() - centre_));
 
+    if (scaledFlowRate_)
+    {
+        // Updated volumetric flow-rate
+        tFlowRate *= pow(2.0*sqrt(radiusSqr)/avgDiameter_, powerCoeff_);
+    }
+
 	// Compute mean velocity
-	const scalar avgU = -flowRate_->value(t)/gSumArea;
+	const scalar avgU = -tFlowRate/gSumArea;
 
 	// Volumetric flow-rate
 	operator==(n*2.0*(avgU/rho)*(1.0 - (r*r)/(radiusSqr)));

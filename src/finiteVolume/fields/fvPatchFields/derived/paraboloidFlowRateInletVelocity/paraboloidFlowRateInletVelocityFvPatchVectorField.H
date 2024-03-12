@@ -27,13 +27,10 @@ License
 Class
     Foam::paraboloidFlowRateInletVelocityFvPatchVectorField
 
-Group
-    grpInletBoundaryConditions
-
 Description
     Velocity inlet boundary condition either correcting the extrapolated
-    velocity or creating a uniform velocity field normal to the patch adjusted
-    to match the specified flow rate
+    velocity or creating a paraboloid velocity field normal to the patch
+    adjusted to match the specified flow rate
 
     For a mass-based flux:
     - the flow rate should be provided in kg/s
@@ -45,6 +42,16 @@ Description
     For a volumetric-based flux:
     - the flow rate is in m3/s
 
+    The condition is recommended for cylindrical inlets, as it generates a
+    paraboloid inlet velocity field, which may introduce reverse flow if the
+    inlet is not circular. Additionally, the informed flow rate can be scaled
+    by a term (Di/Davg)^n, where Di is the diameter of the inlet and Davg is a
+    reference diameter where the passed flow rate was measured; n is a power
+    coefficient. The motivation for this is Murray's law of cardiovascular
+    flows. It is recommended to be used for flows whose inlet flow was
+    extracted from average populations, and a patient-specific flow rate should
+    be used, intead.
+
 Usage
     \table
         Property     | Description             | Required    | Default value
@@ -53,6 +60,9 @@ Usage
         rho          | density field name      | no          | rho
         rhoInlet     | inlet density           | no          |
         extrapolateProfile | Extrapolate velocity profile | no | false
+        scaledFlowRate | Scale flow rate | no | false
+        avgDiameter | If scaled, reference diameter | no |
+        powerCoeff | If scaled, power coeff. | no |
     \endtable
 
     Example of the boundary condition specification for a volumetric flow rate:
@@ -131,9 +141,17 @@ class paraboloidFlowRateInletVelocityFvPatchVectorField
         //- Is volumetric?
         bool volumetric_;
 
-		//- Central point of patch
-		const vector centre_;
+        //- Central point of patch
+        const vector centre_;
 
+        //- Use Murray's law scaled flow rate?
+        bool scaledFlowRate_;
+
+        //- If scaled flow rate, the average diameter
+        scalar avgDiameter_;
+
+        //- If scaled flow rate, the power coefficient (n in Murray's law)
+        scalar powerCoeff_;
 
     // Private member functions
 
