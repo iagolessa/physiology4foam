@@ -278,6 +278,9 @@ void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::write(Ostream& os)
         os.writeEntryIfDifferent<scalar>("rhoInlet", -VGREAT, rhoInlet_);
     }
     os.writeEntry("centre", centre_);
+    os.writeEntry("scaledFlowRate", scaledFlowRate_);
+    os.writeEntry("avgDiameter", avgDiameter_);
+    os.writeEntry("powerCoeff", powerCoeff_);
     writeEntry("value", os);
 }
 
