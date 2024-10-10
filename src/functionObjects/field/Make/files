@@ -1,5 +1,6 @@
 
 wallShearComponent/wallShearComponent.C
 strainRate/strainRate.C
+CauchyStress/CauchyStress.C
 
 LIB = $(FOAM_USER_LIBBIN)/libcustomFieldFunctionObjects
