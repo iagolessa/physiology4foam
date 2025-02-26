@@ -2,7 +2,7 @@
 
 # Custom bashrc file
 
-export CUSTOM_PROJECT_DIR=$HOME/$WM_PROJECT/OpenFOAM-extra
+export CUSTOM_PROJECT_DIR=$HOME/$WM_PROJECT/physiology4foam
 
 # Location of solids4foam library
 #export SOLIDS4FOAM_DIR=$HOME/$WM_PROJECT/solids4foam-VERSION
