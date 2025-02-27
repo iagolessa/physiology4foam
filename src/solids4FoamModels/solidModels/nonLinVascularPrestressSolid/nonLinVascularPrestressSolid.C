@@ -39,10 +39,6 @@ namespace solidModels
 defineTypeNameAndDebug(nonLinVascularPrestressSolid, 0);
 addToRunTimeSelectionTable
 (
-    physicsModel, nonLinVascularPrestressSolid, solid
-);
-addToRunTimeSelectionTable
-(
     solidModel, nonLinVascularPrestressSolid, dictionary
 );
 
@@ -165,7 +161,7 @@ nonLinVascularPrestressSolid::nonLinVascularPrestressSolid
         // Check ddt scheme for D is not steadyState
         const word ddtDScheme
         (
-#ifdef OPENFOAMESIORFOUNDATION
+#ifdef OPENFOAM_NOT_EXTEND
             mesh().ddtScheme("ddt(" + D().name() +')')
 #else
             mesh().schemesDict().ddtScheme("ddt(" + D().name() +')')
@@ -179,6 +175,23 @@ nonLinVascularPrestressSolid::nonLinVascularPrestressSolid
                 << ") scheme should not be 'steadyState'!" << abort(FatalError);
         }
     }
+
+    // For consistent restarts, we will update the relative kinematic fields
+    //D().correctBoundaryConditions();
+    //if (restart())
+    //{
+    //    DD() = D() - D().oldTime();
+    //    mechanical().grad(D(), gradD());
+    //    gradDD() = gradD() - gradD().oldTime();
+    //    F_ = I + gradD().T();
+    //    Finv_ = inv(F_);
+    //    J_ = det(F_);
+
+    //    gradD().storeOldTime();
+
+    //    // Let the mechanical law know
+    //    mechanical().setRestart();
+    //}
 }
 
 
@@ -195,7 +208,7 @@ bool nonLinVascularPrestressSolid::evolve()
     }
 
     int iCorr = 0;
-#ifdef OPENFOAMESIORFOUNDATION
+#ifdef OPENFOAM_NOT_EXTEND
     SolverPerformance<vector> solverPerfD;
     SolverPerformance<vector>::debug = 0;
 #else
@@ -203,27 +216,27 @@ bool nonLinVascularPrestressSolid::evolve()
     blockLduMatrix::debug = 0;
 #endif
 
-    Info<< "Setting the displacement displacement to zero" << endl;
+    Info<< "Setting the displacement to zero" << endl;
 
     // Force displacement to zero at the beginning of each time-step
     D() = zeroDisplacement_;
 
-	// Update gradient of displacement
-	mechanical().grad(zeroDisplacement_, gradD());
+    // Update gradient of displacement
+    mechanical().grad(zeroDisplacement_, gradD());
 
-	// Update gradient of displacement increment
-	gradDD() = gradD() - gradD().oldTime();
+    // Update gradient of displacement increment
+    gradDD() = gradD() - gradD().oldTime();
 
-	// Total deformation gradient
-	F_ = I + gradD().T();
+    // Total deformation gradient
+    F_ = I + gradD().T();
 
-	// Inverse of the deformation gradient
-	Finv_ = inv(F_);
+    // Inverse of the deformation gradient
+    Finv_ = inv(F_);
 
-	// Jacobian of the deformation gradient
-	J_ = det(F_);
+    // Jacobian of the deformation gradient
+    J_ = det(F_);
 
-	mechanical().correct(sigma());
+    mechanical().correct(sigma());
 
     Info<< "Max. D " << max(D()).value() << " "
         << "Min. D " << min(D()).value() << endl;
@@ -233,11 +246,11 @@ bool nonLinVascularPrestressSolid::evolve()
 
     Info<< "F " << max(F_).value() << endl;
 
-	// Define total stress
-	volSymmTensorField totalSigma = sigma();
+    // Define total stress
+    volSymmTensorField totalSigma = sigma();
 
     Info<< "2nd PK stress before update:" << endl 
-		<< "Max. S " << max(mag(S0_)).value() << " "
+        << "Max. S " << max(mag(S0_)).value() << " "
         << "Min. S " << min(mag(S0_)).value() << endl;
 
     Info<< "Solving the total Lagrangian form of the momentum equation for D"
@@ -248,10 +261,10 @@ bool nonLinVascularPrestressSolid::evolve()
     {
         // Store fields for under-relaxation and residual calculation
         D().storePrevIter();
-		S0_.storePrevIter();
-		
-		// Update sigma to account for new S0
-		totalSigma = sigma() + (1/J_)*symm(F_ & S0_ & F_.T());
+        S0_.storePrevIter();
+        
+        // Update sigma to account for new S0
+        totalSigma = sigma() + (1/J_)*symm(F_ & S0_ & F_.T());
 
         // Momentum equation total displacement total Lagrangian form
         fvVectorMatrix DEqn
@@ -302,17 +315,9 @@ bool nonLinVascularPrestressSolid::evolve()
        !converged
         (
             iCorr,
-#ifdef OPENFOAMESIORFOUNDATION
+#ifdef OPENFOAM_NOT_EXTEND
             mag(solverPerfD.initialResidual()),
-            max
-            (
-                solverPerfD.nIterations()[0],
-                max
-                (
-                    solverPerfD.nIterations()[1],
-                    solverPerfD.nIterations()[2]
-                )
-            ),
+            cmptMax(solverPerfD.nIterations()),
 #else
             solverPerfD.initialResidual(),
             solverPerfD.nIterations(),
@@ -325,17 +330,17 @@ bool nonLinVascularPrestressSolid::evolve()
         << "Min. D " << min(mag(D())).value() << endl;
 
     Info<< "2nd PK stress before update:" << endl 
-		<< "Max. S " << max(mag(S0_)).value() << " "
+        << "Max. S " << max(mag(S0_)).value() << " "
         << "Min. S " << min(mag(S0_)).value() << endl;
 
     Info<< "F " << max(F_).value() << endl;
 
-	// Update second Piola-Kirchhoff tensor
+    // Update second Piola-Kirchhoff tensor
     S0_ += J_*symm(Finv_ & sigma() & Finv_.T());
-	S0_.relax();
+    S0_.relax();
 
     Info<< "2nd PK stress after update:" << endl 
-		<< "Max. S " << max(mag(S0_)).value() << " "
+        << "Max. S " << max(mag(S0_)).value() << " "
         << "Min. S " << min(mag(S0_)).value() << endl;
 
     // Interpolate cell displacements to vertices
@@ -347,7 +352,9 @@ bool nonLinVascularPrestressSolid::evolve()
     // Velocity
     U() = fvc::ddt(D());
 
-#ifndef OPENFOAMESIORFOUNDATION
+#ifdef OPENFOAM_NOT_EXTEND
+    SolverPerformance<vector>::debug = 1;
+#else
     blockLduMatrix::debug = 1;
 #endif
 
