@@ -1,0 +1,4 @@
+
+solidModels/nonLinVascularPrestressSolid/nonLinVascularPrestressSolid.C
+
+LIB = $(FOAM_USER_LIBBIN)/libphysiologySolids4FoamModels
