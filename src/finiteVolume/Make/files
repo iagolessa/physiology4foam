@@ -4,4 +4,4 @@ derivedFvPatchFields = $(fvPatchFields)/derived
 
 $(derivedFvPatchFields)/paraboloidFlowRateInletVelocity/paraboloidFlowRateInletVelocityFvPatchVectorField.C
 
-LIB = $(FOAM_USER_LIBBIN)/libcustomFiniteVolume
+LIB = $(FOAM_USER_LIBBIN)/libphysiologyFiniteVolume
