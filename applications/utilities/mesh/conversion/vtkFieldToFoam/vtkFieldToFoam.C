@@ -30,8 +30,8 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Convert legacy VTK file (ascii) containing an unstructured grid
-    to an OpenFOAM mesh without boundary information.
+    Convert legacy VTK file (ascii) containing an unstructured grid with fields
+    defined on it to an OpenFOAM mesh without boundary information.
 
 Note
     The .vtk format does not contain any boundary information.
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     argList::addNote
     (
         "Convert vtkUnstructuredGrid to OpenFOAM mesh and write the cell "
-        "in it to a OpenFOAM volScalarField."
+        "fields in it to an OpenFOAM volScalarField."
     );
 
     argList::noParallel();

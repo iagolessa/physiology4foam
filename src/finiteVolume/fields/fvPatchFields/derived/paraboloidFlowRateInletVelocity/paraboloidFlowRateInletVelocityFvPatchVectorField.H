@@ -30,7 +30,7 @@ Class
 Description
     Velocity inlet boundary condition either correcting the extrapolated
     velocity or creating a paraboloid velocity field normal to the patch
-    adjusted to match the specified flow rate
+    adjusted to match the specified flow rate.
 
     For a mass-based flux:
     - the flow rate should be provided in kg/s
