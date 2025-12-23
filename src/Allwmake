@@ -11,6 +11,10 @@ fi
 
 set +x
 
+# Create links to base
+wmakeLnInclude base
+
+# Build all
 finiteVolume/Allwmake
 (cd functionObjects/ && ./Allwmake)
 

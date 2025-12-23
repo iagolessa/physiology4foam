@@ -19,8 +19,4 @@ fi
 # Clean applications
 (cd applications && ./Allwclean)
 
-# Clear all build logs
-echo; echo "Removing all log.Allwmake build logs"; echo
-find . -name log.Allwmake | xargs rm
-
 #------------------------------------------------------------------------------
