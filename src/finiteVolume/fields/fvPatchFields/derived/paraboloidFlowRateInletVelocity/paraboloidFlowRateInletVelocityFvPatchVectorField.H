@@ -111,8 +111,14 @@ SourceFiles
 #ifndef paraboloidFlowRateInletVelocityFvPatchVectorField_H
 #define paraboloidFlowRateInletVelocityFvPatchVectorField_H
 
+#include "foamCompatibility.H"
 #include "fixedValueFvPatchFields.H"
-#include "Function1.H"
+
+#if defined(FOAMEXTEND)
+    #include "interpolationTable.H"
+#else
+    #include "Function1.H"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -129,17 +135,28 @@ class paraboloidFlowRateInletVelocityFvPatchVectorField
 {
     // Private data
 
-        //- Inlet integral flow rate
-        autoPtr<Function1<scalar>> flowRate_;
+#if defined(FOAMEXTEND)
+        //- Time-varying inlet integral flow rate
+        const interpolationTable<scalar> flowRate_;
 
-        //- Name of the density field used to normalize the mass flux
-        word rhoName_;
+        //- Name of the flux transporting the field
+        word phiName_;
+
+        //- Sum areas.  Note: not correctly updated on mesh motion
+        scalar gSumArea_;
+#else
+        //- Time-varying inlet integral flow rate
+        autoPtr<Function1<scalar>> flowRate_;
 
         //- Rho initialisation value (for start; if value not supplied)
         scalar rhoInlet_;
 
         //- Is volumetric?
         bool volumetric_;
+#endif
+
+        //- Name of the density field used to normalize the mass flux
+        word rhoName_;
 
         //- Central point of patch
         const vector centre_;
@@ -155,10 +172,14 @@ class paraboloidFlowRateInletVelocityFvPatchVectorField
 
     // Private member functions
 
-        //- Update the patch values given the appropriate density type and value
+#if !defined(FOAMEXTEND)
         template<class RhoType>
+        //- Update the patch values given the appropriate density type and value
         void updateValues(const RhoType& rho);
+#endif
 
+        // Possible TODO: implement a unified calculateMurrayScaling() here
+        // to return the (Di/Davg)^n factor for both versions.
 
 public:
 

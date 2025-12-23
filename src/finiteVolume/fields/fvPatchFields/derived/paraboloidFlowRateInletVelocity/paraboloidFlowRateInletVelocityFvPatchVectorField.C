@@ -43,9 +43,14 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(p, iF),
     flowRate_(),
-    rhoName_("rho"),
+#if defined(FOAMEXTEND)
+    phiName_("phi"),
+    gSumArea_(gSum(p.magSf())),
+#else
     rhoInlet_(0.0),
     volumetric_(false),
+#endif
+    rhoName_("rho"),
     centre_(),
     scaledFlowRate_(false),
     avgDiameter_(),
@@ -61,10 +66,17 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
+#if defined(FOAMEXTEND)
+    fixedValueFvPatchField<vector>(p, iF, dict),
+    flowRate_(dict),
+    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
+    gSumArea_(gSum(p.magSf())),
+#else
     fixedValueFvPatchField<vector>(p, iF, dict, false),
-    rhoName_("rho"),
     rhoInlet_(dict.lookupOrDefault<scalar>("rhoInlet", -VGREAT)),
     volumetric_(false),
+#endif
+    rhoName_("rho"),
     centre_
     (
         dict.lookupOrDefault<vector>("centre", vector::zero)
@@ -82,6 +94,7 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
         dict.lookupOrDefault<scalar>("powerCoeff", 0.0)
     )
 {
+#if defined(OPENFOAM_COM)
     if (dict.found("volumetricFlowRate"))
     {
         volumetric_ = true;
@@ -101,6 +114,20 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
             << exit(FatalIOError);
     }
 
+    // Value field require if mass based
+    if (dict.found("value"))
+    {
+        fvPatchField<vector>::operator=
+        (
+            vectorField("value", dict, p.size())
+        );
+    }
+    else
+    {
+        evaluate(Pstream::commsTypes::blocking);
+    }
+#endif
+
     if (scaledFlowRate_ && avgDiameter_ <= 0.0)
     {
         FatalIOErrorInFunction(dict)
@@ -116,19 +143,6 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
             << "for scaled flow rate" << nl
             << exit(FatalIOError);
     }
-
-    // Value field require if mass based
-    if (dict.found("value"))
-    {
-        fvPatchField<vector>::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
-    {
-        evaluate(Pstream::commsTypes::blocking);
-    }
 }
 
 
@@ -142,10 +156,16 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
+#if defined(FOAMEXTEND)
+    flowRate_(ptf.flowRate_),
+    phiName_(ptf.phiName_),
+    gSumArea_(gSum(p.magSf())),
+#else
     flowRate_(ptf.flowRate_.clone()),
-    rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),
     volumetric_(ptf.volumetric_),
+#endif
+    rhoName_(ptf.rhoName_),
     centre_(ptf.centre_),
     scaledFlowRate_(ptf.scaledFlowRate_),
     avgDiameter_(ptf.avgDiameter_),
@@ -160,10 +180,16 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf),
+#if defined(FOAMEXTEND)
+    flowRate_(ptf.flowRate_),
+    phiName_(ptf.phiName_),
+    gSumArea_(gSum(ptf.patch().magSf())),
+#else
     flowRate_(ptf.flowRate_.clone()),
-    rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),
     volumetric_(ptf.volumetric_),
+#endif
+    rhoName_(ptf.rhoName_),
     centre_(ptf.centre_),
     scaledFlowRate_(ptf.scaledFlowRate_),
     avgDiameter_(ptf.avgDiameter_),
@@ -179,10 +205,16 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, iF),
+#if defined(FOAMEXTEND)
+    flowRate_(ptf.flowRate_),
+    phiName_(ptf.phiName_),
+    gSumArea_(gSum(ptf.patch().magSf())),
+#else
     flowRate_(ptf.flowRate_.clone()),
-    rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),
     volumetric_(ptf.volumetric_),
+#endif
+    rhoName_(ptf.rhoName_),
     centre_(ptf.centre_),
     scaledFlowRate_(ptf.scaledFlowRate_),
     avgDiameter_(ptf.avgDiameter_),
@@ -192,6 +224,7 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+#if defined(OPENFOAM_COM)
 template<class RhoType>
 void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::updateValues
 (
@@ -226,6 +259,7 @@ void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::updateValues
 	// Volumetric flow-rate
 	operator==(n*2.0*(avgU/rho)*(1.0 - (r*r)/(radiusSqr)));
 }
+#endif
 
 
 void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
@@ -234,6 +268,58 @@ void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
     {
         return;
     }
+
+#if defined(FOAMEXTEND)
+	// Store square radius
+	// Patch is considered circular
+	scalar radiusSqr = gSumArea_/mathematicalConstant::pi;
+
+	// Radial coordinate
+	const scalarField r(mag(patch().Cf() - centre_));
+
+	// Get flow rate at the instant
+	scalar curFlowRate = flowRate_(this->db().time().timeOutputValue());
+
+    if (scaledFlowRate_)
+    {
+        // Updated volumetric flow-rate
+        curFlowRate *= pow(2.0*sqrt(radiusSqr)/avgDiameter_, powerCoeff_);
+    }
+
+	// Compute mean velocity
+	scalar avgU = -curFlowRate/(gSumArea_ + SMALL);
+
+	vectorField n = patch().nf();
+
+	const surfaceScalarField& phi =
+		db().lookupObject<surfaceScalarField>(phiName_);
+
+	// Evaluate boundary condition
+    if (phi.dimensions() == dimVelocity*dimArea)
+    {
+        // Volumetric flow-rate
+		operator==(n*2.0*avgU*(1.0 - (r*r)/(radiusSqr)));
+    }
+    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    {
+        const fvPatchField<scalar>& rhop =
+            lookupPatchField<volScalarField, scalar>(rhoName_);
+
+        // Mass flow-rate
+		operator==(n*2.0*(avgU/rhop)*(1.0 - (r*r)/(radiusSqr)));
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "flowRateInletVelocityFvPatchVectorField::updateCoeffs()"
+        )   << "dimensions of " << phiName_ << " are incorrect" << nl
+            << "    on patch " << this->patch().name()
+            << " of field " << this->dimensionedInternalField().name()
+            << " in file " << this->dimensionedInternalField().objectPath()
+            << nl << exit(FatalError);
+    }
+#else
 
     if (volumetric_ || rhoName_ == "none")
     {
@@ -264,6 +350,8 @@ void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
         }
     }
 
+#endif
+
     fixedValueFvPatchVectorField::updateCoeffs();
 }
 
@@ -271,16 +359,37 @@ void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
 void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchField<vector>::write(os);
+
+#if defined(FOAMEXTEND)
+    if (phiName_ != "phi")
+    {
+        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
+    }
+    if (rhoName_ != "rho")
+    {
+        os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
+    }
+
+	os.writeKeyword("centre") << centre_ << token::END_STATEMENT << nl;
+	os.writeKeyword("scaledFlowRate") << scaledFlowRate_ << token::END_STATEMENT << nl;
+	os.writeKeyword("avgDiameter") << avgDiameter_ << token::END_STATEMENT << nl;
+	os.writeKeyword("powerCoeff") << powerCoeff_ << token::END_STATEMENT << nl;
+
+	flowRate_.write(os);
+#else
     flowRate_->writeData(os);
     if (!volumetric_)
     {
         os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
         os.writeEntryIfDifferent<scalar>("rhoInlet", -VGREAT, rhoInlet_);
     }
+
     os.writeEntry("centre", centre_);
     os.writeEntry("scaledFlowRate", scaledFlowRate_);
     os.writeEntry("avgDiameter", avgDiameter_);
     os.writeEntry("powerCoeff", powerCoeff_);
+#endif
+
     writeEntry("value", os);
 }
 

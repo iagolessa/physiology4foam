@@ -1,10 +1,14 @@
-#!/bin/sh
-cd "${0%/*}" || exit                                # Run from this directory
+#!/bin/bash
+cd "${0%/*}" || exit  # Run from this directory
 
 #------------------------------------------------------------------------------
 
+echo
+echo "Cleaning functionObjects"
+echo
+
 if [[ "$WM_PROJECT_DIR" == "OpenFOAM" ]]; then
-    wmake libso field
+    wclean lib field
 fi
 
 #------------------------------------------------------------------------------

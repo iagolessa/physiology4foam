@@ -6,7 +6,8 @@ echo "Cleaning src"
 echo
 
 wclean lib finiteVolume
-wclean lib functionObjects
 wclean lib solids4FoamModels
+
+functionObjects/Allwclean
 
 #------------------------------------------------------------------------------

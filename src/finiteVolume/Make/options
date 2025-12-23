@@ -1,8 +1,22 @@
+P4F_ROOT := ../..
+
+sinclude $(P4F_ROOT)/etc/wmake-compatibility
+
+ifneq (,$(findstring -DFOAMEXTEND, $(VERSION_SPECIFIC_INC)))
+    VERSION_SPECIFIC_LIBS =
+
+else ifneq (,$(findstring -DOPENFOAM_ORG, $(VERSION_SPECIFIC_INC)))
+    VERSION_SPECIFIC_LIBS =
+else
+    VERSION_SPECIFIC_LIBS =
+endif
+
 EXE_INC = \
-	-I$(LIB_SRC)/meshTools/lnInclude \
+    -Wno-old-style-cast -Wno-deprecated-declarations \
+    $(VERSION_SPECIFIC_INC) \
+	-I$(P4F_ROOT)/src/base/lnInclude \
 	-I$(LIB_SRC)/finiteVolume/lnInclude \
 
 LIB_LIBS = \
-	-lOpenFOAM \
-	-lmeshTools \
+    $(VERSION_SPECIFIC_LIBS) \
 	-lfiniteVolume

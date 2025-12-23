@@ -1,0 +1,29 @@
+#------------------------------------------------------------------------------
+
+# Standard handling of different flavours of OpenFOAM
+# Based on solids4Foam approach for similar macro names
+ifeq ($(WM_PROJECT), foam)
+    # Appears to be foam-extend
+    VER := $(shell expr `echo $(WM_PROJECT_VERSION)` \>= 4.1)
+    ifeq ($(VER), 1)
+        VERSION_SPECIFIC_INC = -DFOAMEXTEND=41
+    else
+        VERSION_SPECIFIC_INC = -DFOAMEXTEND=40
+    endif
+else
+    # For openfoam.com: check -DOPENFOAM= in its general compiler flags
+    # or (for redundancy) version vYYMM
+    ifneq (,$(findstring -DOPENFOAM=,$(GFLAGS)))
+        VERSION_SPECIFIC_INC = -DOPENFOAM_COM
+    else ifneq (,$(findstring v,$(WM_PROJECT_VERSION)))
+        VERSION_SPECIFIC_INC = -DOPENFOAM_COM
+    else
+        VERSION_SPECIFIC_INC = -DOPENFOAM_ORG
+    endif
+    # Not foam-extend
+    VERSION_SPECIFIC_INC += -DOPENFOAM_NOT_EXTEND
+endif
+
+VERSION_SPECIFIC_LIBS =
+
+#------------------------------------------------------------------------------
