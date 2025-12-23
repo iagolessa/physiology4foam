@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "paraboloidFlowRateInletVelocityFvPatchVectorField.H"
+#include "cardiacFlowRateInletVelocityFvPatchVectorField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 #include "one.H"
@@ -34,8 +34,8 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::
-paraboloidFlowRateInletVelocityFvPatchVectorField
+Foam::cardiacFlowRateInletVelocityFvPatchVectorField::
+cardiacFlowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF
@@ -58,8 +58,8 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
 {}
 
 
-Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::
-paraboloidFlowRateInletVelocityFvPatchVectorField
+Foam::cardiacFlowRateInletVelocityFvPatchVectorField::
+cardiacFlowRateInletVelocityFvPatchVectorField
 (
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
@@ -146,10 +146,10 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
 }
 
 
-Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::
-paraboloidFlowRateInletVelocityFvPatchVectorField
+Foam::cardiacFlowRateInletVelocityFvPatchVectorField::
+cardiacFlowRateInletVelocityFvPatchVectorField
 (
-    const paraboloidFlowRateInletVelocityFvPatchVectorField& ptf,
+    const cardiacFlowRateInletVelocityFvPatchVectorField& ptf,
     const fvPatch& p,
     const DimensionedField<vector, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -173,10 +173,10 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
 {}
 
 
-Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::
-paraboloidFlowRateInletVelocityFvPatchVectorField
+Foam::cardiacFlowRateInletVelocityFvPatchVectorField::
+cardiacFlowRateInletVelocityFvPatchVectorField
 (
-    const paraboloidFlowRateInletVelocityFvPatchVectorField& ptf
+    const cardiacFlowRateInletVelocityFvPatchVectorField& ptf
 )
 :
     fixedValueFvPatchField<vector>(ptf),
@@ -197,10 +197,10 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
 {}
 
 
-Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::
-paraboloidFlowRateInletVelocityFvPatchVectorField
+Foam::cardiacFlowRateInletVelocityFvPatchVectorField::
+cardiacFlowRateInletVelocityFvPatchVectorField
 (
-    const paraboloidFlowRateInletVelocityFvPatchVectorField& ptf,
+    const cardiacFlowRateInletVelocityFvPatchVectorField& ptf,
     const DimensionedField<vector, volMesh>& iF
 )
 :
@@ -226,7 +226,7 @@ paraboloidFlowRateInletVelocityFvPatchVectorField
 
 #if defined(OPENFOAM_COM)
 template<class RhoType>
-void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::updateValues
+void Foam::cardiacFlowRateInletVelocityFvPatchVectorField::updateValues
 (
     const RhoType& rho
 )
@@ -262,7 +262,7 @@ void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::updateValues
 #endif
 
 
-void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
+void Foam::cardiacFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
 {
     if (updated())
     {
@@ -356,7 +356,7 @@ void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
 }
 
 
-void Foam::paraboloidFlowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
+void Foam::cardiacFlowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchField<vector>::write(os);
 
@@ -401,7 +401,7 @@ namespace Foam
    makePatchTypeField
    (
        fvPatchVectorField,
-       paraboloidFlowRateInletVelocityFvPatchVectorField
+       cardiacFlowRateInletVelocityFvPatchVectorField
    );
 }
 

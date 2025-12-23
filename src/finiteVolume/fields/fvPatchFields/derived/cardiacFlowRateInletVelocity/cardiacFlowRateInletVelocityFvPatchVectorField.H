@@ -25,7 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::paraboloidFlowRateInletVelocityFvPatchVectorField
+    Foam::cardiacFlowRateInletVelocityFvPatchVectorField
 
 Description
     Velocity inlet boundary condition either correcting the extrapolated
@@ -69,7 +69,7 @@ Usage
     \verbatim
     <patchName>
     {
-        type                paraboloidFlowRateInletVelocity;
+        type                cardiacFlowRateInletVelocity;
         volumetricFlowRate  0.2;
         extrapolateProfile  yes;
         value               uniform (0 0 0);
@@ -80,7 +80,7 @@ Usage
     \verbatim
     <patchName>
     {
-        type                paraboloidFlowRateInletVelocity;
+        type                cardiacFlowRateInletVelocity;
         massFlowRate        0.2;
         extrapolateProfile  yes;
         rho                 rho;
@@ -104,12 +104,12 @@ See also
     Foam::flowRateOutletVelocityFvPatchVectorField
 
 SourceFiles
-    paraboloidFlowRateInletVelocityFvPatchVectorField.C
+    cardiacFlowRateInletVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef paraboloidFlowRateInletVelocityFvPatchVectorField_H
-#define paraboloidFlowRateInletVelocityFvPatchVectorField_H
+#ifndef cardiacFlowRateInletVelocityFvPatchVectorField_H
+#define cardiacFlowRateInletVelocityFvPatchVectorField_H
 
 #include "foamCompatibility.H"
 #include "fixedValueFvPatchFields.H"
@@ -126,10 +126,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-           Class paraboloidFlowRateInletVelocityFvPatchVectorField Declaration
+           Class cardiacFlowRateInletVelocityFvPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
-class paraboloidFlowRateInletVelocityFvPatchVectorField
+class cardiacFlowRateInletVelocityFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
@@ -184,20 +184,20 @@ class paraboloidFlowRateInletVelocityFvPatchVectorField
 public:
 
    //- Runtime type information
-   TypeName("paraboloidFlowRateInletVelocity");
+   TypeName("cardiacFlowRateInletVelocity");
 
 
    // Constructors
 
         //- Construct from patch and internal field
-        paraboloidFlowRateInletVelocityFvPatchVectorField
+        cardiacFlowRateInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        paraboloidFlowRateInletVelocityFvPatchVectorField
+        cardiacFlowRateInletVelocityFvPatchVectorField
         (
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
@@ -205,20 +205,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  paraboloidFlowRateInletVelocityFvPatchVectorField
+        //  cardiacFlowRateInletVelocityFvPatchVectorField
         //  onto a new patch
-        paraboloidFlowRateInletVelocityFvPatchVectorField
+        cardiacFlowRateInletVelocityFvPatchVectorField
         (
-            const paraboloidFlowRateInletVelocityFvPatchVectorField&,
+            const cardiacFlowRateInletVelocityFvPatchVectorField&,
             const fvPatch&,
             const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        paraboloidFlowRateInletVelocityFvPatchVectorField
+        cardiacFlowRateInletVelocityFvPatchVectorField
         (
-            const paraboloidFlowRateInletVelocityFvPatchVectorField&
+            const cardiacFlowRateInletVelocityFvPatchVectorField&
         );
 
         //- Construct and return a clone
@@ -226,14 +226,14 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new paraboloidFlowRateInletVelocityFvPatchVectorField(*this)
+                new cardiacFlowRateInletVelocityFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        paraboloidFlowRateInletVelocityFvPatchVectorField
+        cardiacFlowRateInletVelocityFvPatchVectorField
         (
-            const paraboloidFlowRateInletVelocityFvPatchVectorField&,
+            const cardiacFlowRateInletVelocityFvPatchVectorField&,
             const DimensionedField<vector, volMesh>&
         );
 
@@ -245,7 +245,7 @@ public:
         {
             return tmp<fvPatchVectorField>
             (
-                new paraboloidFlowRateInletVelocityFvPatchVectorField(*this, iF)
+                new cardiacFlowRateInletVelocityFvPatchVectorField(*this, iF)
             );
         }
 
