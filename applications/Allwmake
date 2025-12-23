@@ -8,9 +8,16 @@ if [ "$PWD" != "${CUSTOM_PROJECT_DIR}/applications" ]; then
     exit 1
 fi
 
-set -x
+#set -x
 
-#wmake all solvers
-wmake all utilities
+# Select projects that, currently, are only 
+# available in either platform.
+if [ "$WM_PROJECT" = "foam" ]
+then
+    wmake all utilities/postProcessing/velocityField
+    wmake all utilities/postProcessing/wall
+else
+    wmake all utilities/mesh
+fi
 
 # ----------------------------------------------------------------- end-of-file

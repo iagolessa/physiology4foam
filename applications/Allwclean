@@ -5,6 +5,14 @@ echo
 echo "Cleaning applications"
 echo
 
-wclean all utilities
+# Select projects that, currently, are only 
+# available in either platform.
+if [ "$WM_PROJECT" = "foam" ]
+then
+    wclean all utilities/postProcessing/velocityField
+    wclean all utilities/postProcessing/wall
+else
+    wclean all utilities/mesh
+fi
 
 #------------------------------------------------------------------------------
