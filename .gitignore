@@ -89,3 +89,7 @@ doc/Doxygen/DTAGS
 
 # Ignore the test directory
 /tutorialsTest
+
+# Library files which are replaced by links
+src/finiteVolume/Make/files
+src/functionObjects/Make/files

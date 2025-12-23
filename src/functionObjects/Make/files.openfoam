@@ -1,0 +1,6 @@
+
+field/wallShearComponent/wallShearComponent.C
+field/strainRate/strainRate.C
+field/CauchyStress/CauchyStress.C
+
+LIB = $(FOAM_USER_LIBBIN)/libphysiologyFieldFunctionObjects

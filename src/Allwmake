@@ -11,7 +11,7 @@ fi
 
 set +x
 
-wmake libso finiteVolume
-functionObjects/Allwmake
+finiteVolume/Allwmake
+(cd functionObjects/ && ./Allwmake)
 
 # ----------------------------------------------------------------- end-of-file

@@ -11,13 +11,13 @@ if [ "$WM_PROJECT" = "foam" ]
 then
     if [ ! -f Make/files ]
     then
-        echo "============================================================"
-        echo "Skipping library 'functionObjects'."
-        echo "Reason: Current environment is not OpenFOAM.com."
-        echo "Current Version: $WM_PROJECT_VERSION"
-        echo "============================================================"
+        echo "Linking Make/files.foamextend to Make/files"
+        (cd Make && ln -s files.foamextend files)
+    elif [ $(readlink Make/files) != "files.foamextend" ]
+    then
+        echo "Updating Make/files link to Make/files.foamextend"
+        (cd Make && ln -sf files.foamextend files)
     fi
-    exit 0
 else
     if [ ! -f Make/files ]
     then

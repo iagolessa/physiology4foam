@@ -6,7 +6,11 @@ echo "Cleaning src"
 echo
 
 wclean lib finiteVolume
-wclean lib solids4FoamModels
+
+if [[ -d "$SOLIDS4FOAM_ROOT" ]]; then
+    echo "Cleaning solids4FoamModels"
+    wclean lib solids4FoamModels
+fi
 
 functionObjects/Allwclean
 

@@ -1,3 +1,16 @@
+P4F_ROOT := ../../..
+
+sinclude $(P4F_ROOT)/etc/wmake-compatibility
+
+ifneq (,$(findstring -DFOAMEXTEND, $(VERSION_SPECIFIC_INC)))
+    VERSION_SPECIFIC_LIBS =
+
+else ifneq (,$(findstring -DOPENFOAM_ORG, $(VERSION_SPECIFIC_INC)))
+    VERSION_SPECIFIC_LIBS =
+else
+    VERSION_SPECIFIC_LIBS =
+endif
+
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/functionObjects/field/lnInclude \

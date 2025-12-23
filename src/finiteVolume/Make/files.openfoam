@@ -1,0 +1,7 @@
+fvPatchFields = fields/fvPatchFields
+
+derivedFvPatchFields = $(fvPatchFields)/derived
+
+$(derivedFvPatchFields)/cardiacFlowRateInletVelocity/cardiacFlowRateInletVelocityFvPatchVectorField.C
+
+LIB = $(FOAM_USER_LIBBIN)/libphysiologyFiniteVolume
