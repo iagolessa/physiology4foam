@@ -17,5 +17,6 @@ wmakeLnInclude base
 # Build all
 finiteVolume/Allwmake
 (cd functionObjects/ && ./Allwmake)
+transportModels/Allwmake
 
 # ----------------------------------------------------------------- end-of-file
